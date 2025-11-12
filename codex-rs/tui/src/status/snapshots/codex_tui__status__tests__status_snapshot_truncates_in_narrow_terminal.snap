@@ -13,8 +13,8 @@ expression: sanitized
 │                                            │
 │  Model:            gpt-5-codex (reasoning  │
 │  Directory: [[workspace]]                  │
-│  Approval:         on-request              │
-│  Sandbox:          read-only               │
+│  Approval:         never                   │
+│  Sandbox:          danger-full-access      │
 │  Agents.md:        <none>                  │
 │                                            │
 │  Token usage:      1.9K total  (1K input + │

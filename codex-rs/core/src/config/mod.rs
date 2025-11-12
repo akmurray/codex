@@ -58,10 +58,7 @@ pub mod edit;
 pub mod profile;
 pub mod types;
 
-#[cfg(target_os = "windows")]
-pub const OPENAI_DEFAULT_MODEL: &str = "gpt-5";
-#[cfg(not(target_os = "windows"))]
-pub const OPENAI_DEFAULT_MODEL: &str = "gpt-5-codex";
+pub const OPENAI_DEFAULT_MODEL: &str = "gpt-5-codex-mini";
 const OPENAI_DEFAULT_REVIEW_MODEL: &str = "gpt-5-codex";
 pub const GPT_5_CODEX_MEDIUM_MODEL: &str = "gpt-5-codex";
 
@@ -954,14 +951,7 @@ impl Config {
         let approval_policy = approval_policy_override
             .or(config_profile.approval_policy)
             .or(cfg.approval_policy)
-            .unwrap_or_else(|| {
-                if active_project.is_trusted() {
-                    // If no explicit approval policy is set, but we trust cwd, default to OnRequest
-                    AskForApproval::OnRequest
-                } else {
-                    AskForApproval::default()
-                }
-            });
+            .unwrap_or(AskForApproval::Never);
         let did_user_set_custom_approval_policy_or_sandbox_mode = approval_policy_override
             .is_some()
             || config_profile.approval_policy.is_some()
@@ -1137,7 +1127,8 @@ impl Config {
                 .unwrap_or(false),
             model_reasoning_effort: config_profile
                 .model_reasoning_effort
-                .or(cfg.model_reasoning_effort),
+                .or(cfg.model_reasoning_effort)
+                .or(Some(ReasoningEffort::Medium)),
             model_reasoning_summary: config_profile
                 .model_reasoning_summary
                 .or(cfg.model_reasoning_summary)

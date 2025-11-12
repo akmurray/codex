@@ -15,6 +15,14 @@ pub struct Cli {
     #[arg(long = "image", short = 'i', value_name = "FILE", value_delimiter = ',', num_args = 1..)]
     pub images: Vec<PathBuf>,
 
+    /// When true, prompt the user before running in a directory outside the launch location.
+    #[arg(long = "prompt-when-outside-launch-dir", default_value_t = false)]
+    pub prompt_when_outside_launch_dir: bool,
+
+    /// Command to run before showing the interactive prompt. Set to an empty string to skip.
+    #[arg(long = "default-command", value_name = "COMMAND")]
+    pub default_command: Option<String>,
+
     // Internal controls set by the top-level `codex resume` subcommand.
     // These are not exposed as user flags on the base `codex` command.
     #[clap(skip)]

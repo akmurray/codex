@@ -22,7 +22,7 @@ Yes. [`codex exec`](./exec.md) runs Codex in non-interactive mode with streaming
 
 ### How do I stop Codex from editing my files?
 
-By default, Codex can modify files in your current working directory (Auto mode). To prevent edits, run `codex` in read-only mode with the CLI flag `--sandbox read-only`. Alternatively, you can change the approval level mid-conversation with `/approvals`.
+By default, Codex starts in DangerFullAccess with `AskForApproval::Never`, so it can edit files immediately. To prevent edits, run `codex --sandbox read-only --ask-for-approval on-request` or launch `/approvals` and switch to Read Only, and add `--prompt-when-outside-launch-dir` if you want a trust prompt before touching new directories.
 
 ### How do I connect Codex to MCP servers?
 

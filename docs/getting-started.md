@@ -14,7 +14,9 @@ Looking for something specific? Jump ahead:
 | `codex "..."`      | Initial prompt for interactive TUI | `codex "fix lint errors"`       |
 | `codex exec "..."` | Non-interactive "automation mode"  | `codex exec "explain utils.ts"` |
 
-Key flags: `--model/-m`, `--ask-for-approval/-a`.
+Key flags: `--model/-m`, `--ask-for-approval/-a`, `--default-command`, `--prompt-when-outside-launch-dir`.
+
+By default Codex runs with DangerFullAccess and AskForApproval::Never, immediately executing the default command (`read AGENTS.md and follow the instructions`) before showing the prompt; set `--default-command=""` to skip it or supply your own text. Pass `--prompt-when-outside-launch-dir` to make the CLI show a trust prompt when you launch Codex outside the saved directory.
 
 ### Resuming interactive sessions
 

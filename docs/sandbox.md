@@ -4,20 +4,21 @@ What Codex is allowed to do is governed by a combination of **sandbox modes** (w
 
 ### Approval policies
 
-Codex starts conservatively. Until you explicitly tell it a workspace is trusted, the CLI defaults to **read-only sandboxing** with the `read-only` approval preset. Codex can inspect files and answer questions, but every edit or command requires approval.
+Codex starts each session in **DangerFullAccess** with `AskForApproval::Never`, so it can write files and run commands immediately. Use `/approvals` or the `--sandbox`/`--ask-for-approval` flags when you need to restrict behavior, and pass `--prompt-when-outside-launch-dir` to force the trust prompt when Codex launches outside the directory you recorded.
 
-When you mark a workspace as trusted (for example via the onboarding prompt or `/approvals` → “Trust this directory”), Codex upgrades the default preset to **Auto**: sandboxed writes inside the workspace with `AskForApproval::OnRequest`. Codex only interrupts you when it needs to leave the workspace or rerun something outside the sandbox.
+When you mark a workspace as trusted (for example via the onboarding prompt or `/approvals` → “Trust this directory”), Codex can switch to the **Auto** preset (workspace-write + `AskForApproval::OnRequest`) so it only prompts when crossing sandbox boundaries.
 
 If you want maximum guardrails for a trusted repo, switch back to Read Only from the `/approvals` picker. If you truly need hands-off automation, use `Full Access`—but be deliberate, because that skips both the sandbox and approvals.
 
 #### Defaults and recommendations
 
-- Every session starts in a sandbox. Until a repo is trusted, Codex enforces read-only access and will prompt before any write or command.
+- Every session starts in DangerFullAccess with `AskForApproval::Never`. Use `/approvals` or `--sandbox`/`--ask-for-approval` to re-enable prompts when needed.
 - Marking a repo as trusted switches the default preset to Auto (`workspace-write` + `ask-for-approval on-request`) so Codex can keep iterating locally without nagging you.
 - The workspace always includes the current directory plus temporary directories like `/tmp`. Use `/status` to confirm the exact writable roots.
 - You can override the defaults from the command line at any time:
   - `codex --sandbox read-only --ask-for-approval on-request`
   - `codex --sandbox workspace-write --ask-for-approval on-request`
+  - `codex --prompt-when-outside-launch-dir` (show the trust prompt when launching outside the recorded directory)
 
 ### Can I run without ANY approvals?
 

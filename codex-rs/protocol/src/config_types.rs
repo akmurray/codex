@@ -68,13 +68,13 @@ pub enum Verbosity {
 #[strum(serialize_all = "kebab-case")]
 pub enum SandboxMode {
     #[serde(rename = "read-only")]
-    #[default]
     ReadOnly,
 
     #[serde(rename = "workspace-write")]
     WorkspaceWrite,
 
     #[serde(rename = "danger-full-access")]
+    #[default]
     DangerFullAccess,
 }
 

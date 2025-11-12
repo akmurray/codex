@@ -78,6 +78,8 @@ mod version;
 
 mod wrapping;
 
+const DEFAULT_STARTUP_COMMAND: &str = "read AGENTS.md and follow the instructions";
+
 #[cfg(test)]
 pub mod test_backend;
 
@@ -331,7 +333,8 @@ async fn run_ratatui_app(
         initial_config.cli_auth_credentials_store_mode,
     );
     let login_status = get_login_status(&initial_config);
-    let should_show_trust_screen = should_show_trust_screen(&initial_config);
+    let should_show_trust_screen =
+        should_show_trust_screen(&initial_config, cli.prompt_when_outside_launch_dir);
     let should_show_windows_wsl_screen =
         cfg!(target_os = "windows") && !initial_config.windows_wsl_setup_acknowledged;
     let should_show_onboarding = should_show_onboarding(
@@ -456,14 +459,15 @@ async fn run_ratatui_app(
         resume_picker::ResumeSelection::StartFresh
     };
 
-    let Cli { prompt, images, .. } = cli;
+    let initial_prompt = resolve_initial_prompt(&cli);
+    let Cli { images, .. } = cli;
 
     let app_result = App::run(
         &mut tui,
         auth_manager,
         config,
         active_profile,
-        prompt,
+        initial_prompt,
         images,
         resume_selection,
         feedback,
@@ -530,9 +534,13 @@ async fn load_config_or_exit(
 /// Determine if user has configured a sandbox / approval policy,
 /// or if the current cwd project is already trusted. If not, we need to
 /// show the trust screen.
-fn should_show_trust_screen(config: &Config) -> bool {
+fn should_show_trust_screen(config: &Config, prompt_when_outside_launch_dir: bool) -> bool {
+    if !prompt_when_outside_launch_dir {
+        return false;
+    }
     if cfg!(target_os = "windows") && get_platform_sandbox().is_none() {
-        // If the experimental sandbox is not enabled, Native Windows cannot enforce sandboxed write access without WSL; skip the trust prompt entirely.
+        // If the experimental sandbox is not enabled, Native Windows cannot enforce sandboxed write
+        // access without WSL; skip the trust prompt entirely.
         return false;
     }
     if config.did_user_set_custom_approval_policy_or_sandbox_mode {
@@ -570,6 +578,22 @@ fn should_show_login_screen(login_status: LoginStatus, config: &Config) -> bool 
     login_status == LoginStatus::NotAuthenticated
 }
 
+fn resolve_initial_prompt(cli: &Cli) -> Option<String> {
+    if let Some(prompt) = cli.prompt.clone() {
+        return Some(prompt);
+    }
+    let default_command = cli
+        .default_command
+        .as_ref()
+        .cloned()
+        .unwrap_or_else(|| DEFAULT_STARTUP_COMMAND.to_string());
+    if default_command.trim().is_empty() {
+        None
+    } else {
+        Some(default_command)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -582,7 +606,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn windows_skips_trust_prompt_without_sandbox() -> std::io::Result<()> {
+    fn trust_prompt_respects_flag_setting() -> std::io::Result<()> {
         let temp_dir = TempDir::new()?;
         let mut config = Config::load_from_base_config_with_overrides(
             ConfigToml::default(),
@@ -591,22 +615,16 @@ mod tests {
         )?;
         config.did_user_set_custom_approval_policy_or_sandbox_mode = false;
         config.active_project = ProjectConfig { trust_level: None };
-        set_windows_sandbox_enabled(false);
+        set_windows_sandbox_enabled(true);
 
-        let should_show = should_show_trust_screen(&config);
-        if cfg!(target_os = "windows") {
-            assert!(
-                !should_show,
-                "Windows trust prompt should always be skipped on native Windows"
-            );
-        } else {
-            assert!(
-                should_show,
-                "Non-Windows should still show trust prompt when project is untrusted"
-            );
-        }
+        let should_show = should_show_trust_screen(&config, false);
+        assert!(
+            !should_show,
+            "The trust prompt should be suppressed unless --prompt-when-outside-launch-dir is enabled"
+        );
         Ok(())
     }
+
     #[test]
     #[serial]
     fn windows_shows_trust_prompt_with_sandbox() -> std::io::Result<()> {
@@ -620,7 +638,7 @@ mod tests {
         config.active_project = ProjectConfig { trust_level: None };
         set_windows_sandbox_enabled(true);
 
-        let should_show = should_show_trust_screen(&config);
+        let should_show = should_show_trust_screen(&config, true);
         if cfg!(target_os = "windows") {
             assert!(
                 should_show,
@@ -629,7 +647,35 @@ mod tests {
         } else {
             assert!(
                 should_show,
-                "Non-Windows should still show trust prompt when project is untrusted"
+                "Non-Windows should still show the trust prompt when the directory is untrusted"
+            );
+        }
+        Ok(())
+    }
+
+    #[test]
+    #[serial]
+    fn windows_skips_trust_prompt_without_sandbox_even_with_flag() -> std::io::Result<()> {
+        let temp_dir = TempDir::new()?;
+        let mut config = Config::load_from_base_config_with_overrides(
+            ConfigToml::default(),
+            ConfigOverrides::default(),
+            temp_dir.path().to_path_buf(),
+        )?;
+        config.did_user_set_custom_approval_policy_or_sandbox_mode = false;
+        config.active_project = ProjectConfig { trust_level: None };
+        set_windows_sandbox_enabled(false);
+
+        let should_show = should_show_trust_screen(&config, true);
+        if cfg!(target_os = "windows") {
+            assert!(
+                !should_show,
+                "Windows trust prompt should still be skipped when the native sandbox is unavailable"
+            );
+        } else {
+            assert!(
+                should_show,
+                "Non-Windows should still show the trust prompt when the directory is untrusted"
             );
         }
         Ok(())

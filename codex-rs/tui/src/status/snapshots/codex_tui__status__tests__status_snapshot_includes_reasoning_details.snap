@@ -12,7 +12,7 @@ expression: sanitized
 │                                                                     │
 │  Model:            gpt-5-codex (reasoning high, summaries detailed) │
 │  Directory: [[workspace]]                                           │
-│  Approval:         on-request                                       │
+│  Approval:         never                                            │
 │  Sandbox:          workspace-write                                  │
 │  Agents.md:        <none>                                           │
 │                                                                     │

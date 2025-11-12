@@ -669,6 +669,12 @@ fn merge_resume_cli_flags(interactive: &mut TuiCli, resume_cli: TuiCli) {
     if let Some(prompt) = resume_cli.prompt {
         interactive.prompt = Some(prompt);
     }
+    if resume_cli.prompt_when_outside_launch_dir {
+        interactive.prompt_when_outside_launch_dir = true;
+    }
+    if resume_cli.default_command.is_some() {
+        interactive.default_command = resume_cli.default_command;
+    }
 
     interactive
         .config_overrides

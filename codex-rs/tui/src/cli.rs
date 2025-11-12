@@ -23,6 +23,14 @@ pub struct Cli {
     #[arg(long = "default-command", value_name = "COMMAND")]
     pub default_command: Option<String>,
 
+    /// Show the release notes banner with the GitHub link.
+    #[arg(long = "show-release-notes-link", default_value_t = false)]
+    pub show_release_notes_link: bool,
+
+    /// Show the welcome header and getting-started block.
+    #[arg(long = "show-welcome-section", default_value_t = false)]
+    pub show_welcome_sections: bool,
+
     // Internal controls set by the top-level `codex resume` subcommand.
     // These are not exposed as user flags on the base `codex` command.
     #[clap(skip)]

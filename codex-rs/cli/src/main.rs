@@ -17,12 +17,14 @@ use codex_cli::login::run_login_with_device_code;
 use codex_cli::login::run_logout;
 use codex_cloud_tasks::Cli as CloudTasksCli;
 use codex_common::CliConfigOverrides;
+use codex_core::auth::CODEX_API_KEY_ENV_VAR;
 use codex_exec::Cli as ExecCli;
 use codex_responses_api_proxy::Args as ResponsesApiProxyArgs;
 use codex_tui::AppExitInfo;
 use codex_tui::Cli as TuiCli;
 use codex_tui::update_action::UpdateAction;
 use owo_colors::OwoColorize;
+use std::env;
 use std::path::PathBuf;
 use supports_color::Stream;
 
@@ -57,6 +59,10 @@ struct MultitoolCli {
 
     #[clap(flatten)]
     pub feature_toggles: FeatureToggles,
+
+    /// API key to set as `CODEX_API_KEY` for this session (overrides any env var).
+    #[arg(long = "api-key", value_name = "API_KEY")]
+    pub api_key: Option<String>,
 
     #[clap(flatten)]
     interactive: TuiCli,
@@ -399,9 +405,16 @@ async fn cli_main(codex_linux_sandbox_exe: Option<PathBuf>) -> anyhow::Result<()
     let MultitoolCli {
         config_overrides: mut root_config_overrides,
         feature_toggles,
+        api_key,
         mut interactive,
         subcommand,
     } = MultitoolCli::parse();
+
+    if let Some(key) = api_key {
+        unsafe {
+            env::set_var(CODEX_API_KEY_ENV_VAR, key);
+        }
+    }
 
     // Fold --enable/--disable into config overrides so they flow to all subcommands.
     let toggle_overrides = feature_toggles.to_overrides()?;
@@ -675,6 +688,12 @@ fn merge_resume_cli_flags(interactive: &mut TuiCli, resume_cli: TuiCli) {
     if resume_cli.default_command.is_some() {
         interactive.default_command = resume_cli.default_command;
     }
+    if resume_cli.show_release_notes_link {
+        interactive.show_release_notes_link = true;
+    }
+    if resume_cli.show_welcome_sections {
+        interactive.show_welcome_sections = true;
+    }
 
     interactive
         .config_overrides
@@ -703,6 +722,7 @@ mod tests {
             config_overrides: root_overrides,
             subcommand,
             feature_toggles: _,
+            api_key: _,
         } = cli;
 
         let Subcommand::Resume(ResumeCommand {

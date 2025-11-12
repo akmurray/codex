@@ -157,6 +157,9 @@ pub struct Config {
     /// and turn completions when not focused.
     pub tui_notifications: Notifications,
 
+    pub show_release_notes_link: bool,
+    pub show_welcome_sections: bool,
+
     /// The directory that should be treated as the current working directory
     /// for the session. All relative paths inside the business-logic layer are
     /// resolved against this path.
@@ -837,6 +840,8 @@ pub struct ConfigOverrides {
     pub show_raw_agent_reasoning: Option<bool>,
     pub tools_web_search_request: Option<bool>,
     pub experimental_sandbox_command_assessment: Option<bool>,
+    pub show_release_notes_link: Option<bool>,
+    pub show_welcome_sections: Option<bool>,
     /// Additional directories that should be treated as writable roots for this session.
     pub additional_writable_roots: Vec<PathBuf>,
 }
@@ -868,6 +873,8 @@ impl Config {
             show_raw_agent_reasoning,
             tools_web_search_request: override_tools_web_search_request,
             experimental_sandbox_command_assessment: sandbox_command_assessment_override,
+            show_release_notes_link: show_release_notes_link_override,
+            show_welcome_sections: show_welcome_sections_override,
             additional_writable_roots,
         } = overrides;
 
@@ -1156,6 +1163,12 @@ impl Config {
                 .as_ref()
                 .map(|t| t.notifications.clone())
                 .unwrap_or_default(),
+            show_release_notes_link: show_release_notes_link_override
+                .or(cfg.tui.as_ref().and_then(|t| t.show_release_notes_link))
+                .unwrap_or(false),
+            show_welcome_sections: show_welcome_sections_override
+                .or(cfg.tui.as_ref().and_then(|t| t.show_welcome_sections))
+                .unwrap_or(false),
             otel: {
                 let t: OtelConfigToml = cfg.otel.unwrap_or_default();
                 let log_user_prompt = t.log_user_prompt.unwrap_or(false);
@@ -2895,6 +2908,8 @@ model_verbosity = "high"
                 notices: Default::default(),
                 disable_paste_burst: false,
                 tui_notifications: Default::default(),
+                show_release_notes_link: false,
+                show_welcome_sections: false,
                 otel: OtelConfig::default(),
             },
             o3_profile_config
@@ -2966,6 +2981,8 @@ model_verbosity = "high"
             notices: Default::default(),
             disable_paste_burst: false,
             tui_notifications: Default::default(),
+            show_release_notes_link: false,
+            show_welcome_sections: false,
             otel: OtelConfig::default(),
         };
 
@@ -3052,6 +3069,8 @@ model_verbosity = "high"
             notices: Default::default(),
             disable_paste_burst: false,
             tui_notifications: Default::default(),
+            show_release_notes_link: false,
+            show_welcome_sections: false,
             otel: OtelConfig::default(),
         };
 
@@ -3124,6 +3143,8 @@ model_verbosity = "high"
             notices: Default::default(),
             disable_paste_burst: false,
             tui_notifications: Default::default(),
+            show_release_notes_link: false,
+            show_welcome_sections: false,
             otel: OtelConfig::default(),
         };
 

@@ -349,6 +349,14 @@ pub struct Tui {
     /// Defaults to `false`.
     #[serde(default)]
     pub notifications: Notifications,
+
+    /// When set, show the release notes banner with the GitHub link.
+    #[serde(default)]
+    pub show_release_notes_link: Option<bool>,
+
+    /// When set, show the welcome header and getting-started tips on startup.
+    #[serde(default)]
+    pub show_welcome_sections: Option<bool>,
 }
 
 /// Settings for notices we display to users via the tui and app-server clients

@@ -13,6 +13,9 @@ build/
 out/
 storybook-static/
 
+# allow Coeus backend binary pump
+!/CoeusLocalOfflineWeb1/backend/dist/bin/
+
 # ignore README for publishing
 codex-cli/README.md
 

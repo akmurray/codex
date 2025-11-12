@@ -198,15 +198,17 @@ impl App {
         }
 
         #[cfg(not(debug_assertions))]
-        if let Some(latest_version) = upgrade_version {
-            app.handle_event(
-                tui,
-                AppEvent::InsertHistoryCell(Box::new(UpdateAvailableHistoryCell::new(
-                    latest_version,
-                    crate::update_action::get_update_action(),
-                ))),
-            )
-            .await?;
+        if app.config.show_release_notes_link {
+            if let Some(latest_version) = upgrade_version {
+                app.handle_event(
+                    tui,
+                    AppEvent::InsertHistoryCell(Box::new(UpdateAvailableHistoryCell::new(
+                        latest_version,
+                        crate::update_action::get_update_action(),
+                    ))),
+                )
+                .await?;
+            }
         }
 
         let tui_events = tui.event_stream();

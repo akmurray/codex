@@ -590,7 +590,7 @@ pub(crate) fn new_session_info(
         initial_messages: _,
         rollout_path: _,
     } = event;
-    SessionInfoCell(if is_first_event {
+    SessionInfoCell(if is_first_event && config.show_welcome_sections {
         // Header box rendered as history (so it appears at the very top)
         let header = SessionHeaderHistoryCell::new(
             model,

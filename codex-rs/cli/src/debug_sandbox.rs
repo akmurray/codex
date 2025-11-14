@@ -116,6 +116,7 @@ async fn run_command_under_sandbox(
         ConfigOverrides {
             sandbox_mode: Some(sandbox_mode),
             codex_linux_sandbox_exe,
+            disable_status_indicator_animation: None,
             ..Default::default()
         },
     )

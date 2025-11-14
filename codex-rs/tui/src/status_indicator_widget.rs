@@ -24,6 +24,7 @@ pub(crate) struct StatusIndicatorWidget {
     /// Animated header text (defaults to "Working").
     header: String,
     show_interrupt_hint: bool,
+    disable_animation: bool,
 
     elapsed_running: Duration,
     last_resume_at: Instant,
@@ -50,13 +51,18 @@ pub fn fmt_elapsed_compact(elapsed_secs: u64) -> String {
 }
 
 impl StatusIndicatorWidget {
-    pub(crate) fn new(app_event_tx: AppEventSender, frame_requester: FrameRequester) -> Self {
+    pub(crate) fn new(
+        app_event_tx: AppEventSender,
+        frame_requester: FrameRequester,
+        disable_animation: bool,
+    ) -> Self {
         Self {
             header: String::from("Working"),
             show_interrupt_hint: true,
             elapsed_running: Duration::ZERO,
             last_resume_at: Instant::now(),
             is_paused: false,
+            disable_animation,
 
             app_event_tx,
             frame_requester,
@@ -138,18 +144,31 @@ impl Renderable for StatusIndicatorWidget {
             return;
         }
 
-        // Schedule next animation frame.
-        self.frame_requester
-            .schedule_frame_in(Duration::from_millis(32));
+        // Schedule the next update (more frequent when animating).
+        let frame_delay = if self.disable_animation {
+            Duration::from_secs(1)
+        } else {
+            Duration::from_millis(32)
+        };
+        self.frame_requester.schedule_frame_in(frame_delay);
         let now = Instant::now();
         let elapsed_duration = self.elapsed_duration_at(now);
         let pretty_elapsed = fmt_elapsed_compact(elapsed_duration.as_secs());
 
         // Plain rendering: no borders or padding so the live cell is visually indistinguishable from terminal scrollback.
         let mut spans = Vec::with_capacity(5);
-        spans.push(spinner(Some(self.last_resume_at)));
+        let spinner_span = if self.disable_animation {
+            "•".into()
+        } else {
+            spinner(Some(self.last_resume_at))
+        };
+        spans.push(spinner_span);
         spans.push(" ".into());
-        spans.extend(shimmer_spans(&self.header));
+        if self.disable_animation {
+            spans.push(self.header.clone().into());
+        } else {
+            spans.extend(shimmer_spans(&self.header));
+        }
         spans.push(" ".into());
         if self.show_interrupt_hint {
             spans.extend(vec![
@@ -196,7 +215,7 @@ mod tests {
     fn renders_with_working_header() {
         let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
         let tx = AppEventSender::new(tx_raw);
-        let w = StatusIndicatorWidget::new(tx, crate::tui::FrameRequester::test_dummy());
+        let w = StatusIndicatorWidget::new(tx, crate::tui::FrameRequester::test_dummy(), false);
 
         // Render into a fixed-size test terminal and snapshot the backend.
         let mut terminal = Terminal::new(TestBackend::new(80, 2)).expect("terminal");
@@ -210,7 +229,7 @@ mod tests {
     fn renders_truncated() {
         let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
         let tx = AppEventSender::new(tx_raw);
-        let w = StatusIndicatorWidget::new(tx, crate::tui::FrameRequester::test_dummy());
+        let w = StatusIndicatorWidget::new(tx, crate::tui::FrameRequester::test_dummy(), false);
 
         // Render into a fixed-size test terminal and snapshot the backend.
         let mut terminal = Terminal::new(TestBackend::new(20, 2)).expect("terminal");
@@ -224,7 +243,8 @@ mod tests {
     fn timer_pauses_when_requested() {
         let (tx_raw, _rx) = unbounded_channel::<AppEvent>();
         let tx = AppEventSender::new(tx_raw);
-        let mut widget = StatusIndicatorWidget::new(tx, crate::tui::FrameRequester::test_dummy());
+        let mut widget =
+            StatusIndicatorWidget::new(tx, crate::tui::FrameRequester::test_dummy(), false);
 
         let baseline = Instant::now();
         widget.last_resume_at = baseline;

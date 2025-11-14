@@ -163,6 +163,7 @@ pub async fn run_main(
         experimental_sandbox_command_assessment: None,
         show_release_notes_link: cli.show_release_notes_link.then_some(true),
         show_welcome_sections: cli.show_welcome_sections.then_some(true),
+        disable_status_indicator_animation: cli.disable_status_animation.then_some(true),
         additional_writable_roots: additional_dirs,
     };
     let raw_overrides = cli.config_overrides.raw_overrides.clone();

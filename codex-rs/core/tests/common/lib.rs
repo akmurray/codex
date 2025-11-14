@@ -41,6 +41,7 @@ pub fn load_default_config_for_test(codex_home: &TempDir) -> Config {
 fn default_test_overrides() -> ConfigOverrides {
     ConfigOverrides {
         codex_linux_sandbox_exe: Some(cargo_bin("codex-linux-sandbox")),
+        disable_status_indicator_animation: None,
         ..ConfigOverrides::default()
     }
 }

@@ -159,6 +159,7 @@ pub struct Config {
 
     pub show_release_notes_link: bool,
     pub show_welcome_sections: bool,
+    pub disable_status_indicator_animation: bool,
 
     /// The directory that should be treated as the current working directory
     /// for the session. All relative paths inside the business-logic layer are
@@ -842,6 +843,7 @@ pub struct ConfigOverrides {
     pub experimental_sandbox_command_assessment: Option<bool>,
     pub show_release_notes_link: Option<bool>,
     pub show_welcome_sections: Option<bool>,
+    pub disable_status_indicator_animation: Option<bool>,
     /// Additional directories that should be treated as writable roots for this session.
     pub additional_writable_roots: Vec<PathBuf>,
 }
@@ -875,6 +877,7 @@ impl Config {
             experimental_sandbox_command_assessment: sandbox_command_assessment_override,
             show_release_notes_link: show_release_notes_link_override,
             show_welcome_sections: show_welcome_sections_override,
+            disable_status_indicator_animation: disable_status_indicator_animation_override,
             additional_writable_roots,
         } = overrides;
 
@@ -1168,6 +1171,12 @@ impl Config {
                 .unwrap_or(false),
             show_welcome_sections: show_welcome_sections_override
                 .or(cfg.tui.as_ref().and_then(|t| t.show_welcome_sections))
+                .unwrap_or(false),
+            disable_status_indicator_animation: disable_status_indicator_animation_override
+                .or(cfg
+                    .tui
+                    .as_ref()
+                    .and_then(|t| t.disable_status_indicator_animation))
                 .unwrap_or(false),
             otel: {
                 let t: OtelConfigToml = cfg.otel.unwrap_or_default();
@@ -1486,6 +1495,7 @@ trust_level = "trusted"
             cwd: Some(frontend),
             sandbox_mode: Some(SandboxMode::WorkspaceWrite),
             additional_writable_roots: vec![PathBuf::from("../backend"), backend.clone()],
+            disable_status_indicator_animation: None,
             ..Default::default()
         };
 
@@ -1665,6 +1675,7 @@ trust_level = "trusted"
 
         let overrides = ConfigOverrides {
             sandbox_mode: Some(SandboxMode::WorkspaceWrite),
+            disable_status_indicator_animation: None,
             ..Default::default()
         };
 
@@ -2687,6 +2698,7 @@ model = "gpt-5-codex"
         let codex_home = TempDir::new()?;
         let overrides = ConfigOverrides {
             compact_prompt: Some("Use the compact override".to_string()),
+            disable_status_indicator_animation: None,
             ..Default::default()
         };
 
@@ -2720,6 +2732,7 @@ model = "gpt-5-codex"
 
         let overrides = ConfigOverrides {
             cwd: Some(workspace),
+            disable_status_indicator_animation: None,
             ..Default::default()
         };
 
@@ -2850,6 +2863,7 @@ model_verbosity = "high"
         let o3_profile_overrides = ConfigOverrides {
             config_profile: Some("o3".to_string()),
             cwd: Some(fixture.cwd()),
+            disable_status_indicator_animation: None,
             ..Default::default()
         };
         let o3_profile_config: Config = Config::load_from_base_config_with_overrides(
@@ -2924,6 +2938,7 @@ model_verbosity = "high"
         let gpt3_profile_overrides = ConfigOverrides {
             config_profile: Some("gpt3".to_string()),
             cwd: Some(fixture.cwd()),
+            disable_status_indicator_animation: None,
             ..Default::default()
         };
         let gpt3_profile_config = Config::load_from_base_config_with_overrides(
@@ -2992,6 +3007,7 @@ model_verbosity = "high"
         // uses the default profile from the config file (which is "gpt3").
         let default_profile_overrides = ConfigOverrides {
             cwd: Some(fixture.cwd()),
+            disable_status_indicator_animation: None,
             ..Default::default()
         };
 
@@ -3012,6 +3028,7 @@ model_verbosity = "high"
         let zdr_profile_overrides = ConfigOverrides {
             config_profile: Some("zdr".to_string()),
             cwd: Some(fixture.cwd()),
+            disable_status_indicator_animation: None,
             ..Default::default()
         };
         let zdr_profile_config = Config::load_from_base_config_with_overrides(
@@ -3086,6 +3103,7 @@ model_verbosity = "high"
         let gpt5_profile_overrides = ConfigOverrides {
             config_profile: Some("gpt5".to_string()),
             cwd: Some(fixture.cwd()),
+            disable_status_indicator_animation: None,
             ..Default::default()
         };
         let gpt5_profile_config = Config::load_from_base_config_with_overrides(

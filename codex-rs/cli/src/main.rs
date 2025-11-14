@@ -590,6 +590,7 @@ async fn cli_main(codex_linux_sandbox_exe: Option<PathBuf>) -> anyhow::Result<()
                 // Thread through relevant top-level flags (at minimum, `--profile`).
                 let overrides = ConfigOverrides {
                     config_profile: interactive.config_profile.clone(),
+                    disable_status_indicator_animation: None,
                     ..Default::default()
                 };
 

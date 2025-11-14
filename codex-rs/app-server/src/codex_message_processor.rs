@@ -1158,6 +1158,7 @@ impl CodexMessageProcessor {
             developer_instructions,
             compact_prompt,
             include_apply_patch_tool,
+            disable_status_indicator_animation: None,
             ..Default::default()
         };
 
@@ -1212,6 +1213,7 @@ impl CodexMessageProcessor {
             codex_linux_sandbox_exe: self.codex_linux_sandbox_exe.clone(),
             base_instructions: params.base_instructions,
             developer_instructions: params.developer_instructions,
+            disable_status_indicator_animation: None,
             ..Default::default()
         };
 
@@ -1731,6 +1733,7 @@ impl CodexMessageProcessor {
                     developer_instructions,
                     compact_prompt,
                     include_apply_patch_tool,
+                    disable_status_indicator_animation: None,
                     ..Default::default()
                 };
 

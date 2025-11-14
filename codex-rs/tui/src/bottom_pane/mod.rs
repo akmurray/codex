@@ -64,6 +64,7 @@ pub(crate) struct BottomPane {
 
     app_event_tx: AppEventSender,
     frame_requester: FrameRequester,
+    status_indicator_disable_animation: bool,
 
     has_input_focus: bool,
     is_task_running: bool,
@@ -84,6 +85,7 @@ pub(crate) struct BottomPaneParams {
     pub(crate) enhanced_keys_supported: bool,
     pub(crate) placeholder_text: String,
     pub(crate) disable_paste_burst: bool,
+    pub(crate) disable_status_indicator_animation: bool,
 }
 
 impl BottomPane {
@@ -100,6 +102,7 @@ impl BottomPane {
             view_stack: Vec::new(),
             app_event_tx: params.app_event_tx,
             frame_requester: params.frame_requester,
+            status_indicator_disable_animation: params.disable_status_indicator_animation,
             has_input_focus: params.has_input_focus,
             is_task_running: false,
             ctrl_c_quit_hint: false,
@@ -287,6 +290,7 @@ impl BottomPane {
                 self.status = Some(StatusIndicatorWidget::new(
                     self.app_event_tx.clone(),
                     self.frame_requester.clone(),
+                    self.status_indicator_disable_animation,
                 ));
             }
             if let Some(status) = self.status.as_mut() {
@@ -311,6 +315,7 @@ impl BottomPane {
             self.status = Some(StatusIndicatorWidget::new(
                 self.app_event_tx.clone(),
                 self.frame_requester.clone(),
+                self.status_indicator_disable_animation,
             ));
             self.request_redraw();
         }
@@ -546,6 +551,7 @@ mod tests {
             enhanced_keys_supported: false,
             placeholder_text: "Ask Codex to do anything".to_string(),
             disable_paste_burst: false,
+            disable_status_indicator_animation: false,
         });
         pane.push_approval_request(exec_request());
         assert_eq!(CancellationEvent::Handled, pane.on_ctrl_c());
@@ -566,6 +572,7 @@ mod tests {
             enhanced_keys_supported: false,
             placeholder_text: "Ask Codex to do anything".to_string(),
             disable_paste_burst: false,
+            disable_status_indicator_animation: false,
         });
 
         // Create an approval modal (active view).
@@ -597,6 +604,7 @@ mod tests {
             enhanced_keys_supported: false,
             placeholder_text: "Ask Codex to do anything".to_string(),
             disable_paste_burst: false,
+            disable_status_indicator_animation: false,
         });
 
         // Start a running task so the status indicator is active above the composer.
@@ -662,6 +670,7 @@ mod tests {
             enhanced_keys_supported: false,
             placeholder_text: "Ask Codex to do anything".to_string(),
             disable_paste_burst: false,
+            disable_status_indicator_animation: false,
         });
 
         // Begin a task: show initial status.
@@ -687,6 +696,7 @@ mod tests {
             enhanced_keys_supported: false,
             placeholder_text: "Ask Codex to do anything".to_string(),
             disable_paste_burst: false,
+            disable_status_indicator_animation: false,
         });
 
         // Activate spinner (status view replaces composer) with no live ring.
@@ -716,6 +726,7 @@ mod tests {
             enhanced_keys_supported: false,
             placeholder_text: "Ask Codex to do anything".to_string(),
             disable_paste_burst: false,
+            disable_status_indicator_animation: false,
         });
 
         pane.set_task_running(true);
@@ -742,6 +753,7 @@ mod tests {
             enhanced_keys_supported: false,
             placeholder_text: "Ask Codex to do anything".to_string(),
             disable_paste_burst: false,
+            disable_status_indicator_animation: false,
         });
 
         pane.set_task_running(true);

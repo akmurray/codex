@@ -31,6 +31,10 @@ pub struct Cli {
     #[arg(long = "show-welcome-section", default_value_t = false)]
     pub show_welcome_sections: bool,
 
+    /// Disable the animated status progress indicators.
+    #[arg(long = "disable-status-animation", default_value_t = false)]
+    pub disable_status_animation: bool,
+
     // Internal controls set by the top-level `codex resume` subcommand.
     // These are not exposed as user flags on the base `codex` command.
     #[clap(skip)]
